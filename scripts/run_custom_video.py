@@ -11,11 +11,12 @@ if str(ROOT) not in sys.path:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run image or short-video smoke inference.")
+    parser = argparse.ArgumentParser(description="Run image or video inference for smoke or custom qualitative validation.")
     parser.add_argument("--config", default="configs/base.yaml", help="Base runtime config.")
     parser.add_argument("--input_video", required=True, help="Path to the input image or video.")
     parser.add_argument("--prompt", required=True, help="Text prompt for GroundingDINO.")
     parser.add_argument("--output_dir", required=True, help="Directory for saved artifacts.")
+    parser.add_argument("--run_name", default=None, help="Optional subdirectory name for this run under output_dir.")
     parser.add_argument("--max_frames", type=int, default=None, help="Optional max frame override for videos.")
     parser.add_argument("--grounding_ckpt", default=None, help="Optional override for the GroundingDINO checkpoint path.")
     parser.add_argument("--sam2_ckpt", default=None, help="Optional override for the SAM2 checkpoint path.")
@@ -46,11 +47,15 @@ def main() -> int:
         config["grounding_dino"]["device"] = args.device
         config["sam2"]["device"] = args.device
 
+    output_dir = Path(args.output_dir)
+    if args.run_name:
+        output_dir = output_dir / args.run_name
+
     summary = run_inference(
         input_path=args.input_video,
         prompt=args.prompt,
         config=config,
-        output_dir=args.output_dir,
+        output_dir=output_dir,
     )
     logger.info("Smoke run complete: %s", summary)
     return 0
