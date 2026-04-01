@@ -19,11 +19,12 @@
 
 ### Stage 1 Custom Videos
 
-- `2026-04-01 | hieu_con_quang_ninh | prompt=person | video_mode=sam2_video_predictor | pass`
-- `2026-04-01 | khanh_sky_uong_nuoc | prompt=fridge | video_mode=sam2_video_predictor | pass`
+- `2026-04-01 | hieu_con_quang_ninh | prompt=person | video_mode=sam2_video_predictor | review=good tracking | pass`
+- `2026-04-01 | khanh_sky_uong_nuoc | prompt=fridge | video_mode=sam2_video_predictor | review=wrong object | pass`
 
 ### Notes for Write-up
 
 - Primary runtime stack: `grounding_dino+sam2`
 - Custom-video qualitative validation succeeded on two user videos.
 - Both successful custom runs stayed on the primary SAM2 video path without fallback.
+- Observed failure mode on `khanh_sky_uong_nuoc`: when the fridge is behind the person, detection is no longer accurate and tends toward the wrong object category.
