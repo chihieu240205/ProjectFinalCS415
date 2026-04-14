@@ -63,6 +63,8 @@ def run_eval_subset(
     config: Dict[str, Any],
     output_dir: str | Path,
     limit: int | None = None,
+    summary_filename: str = "subset_run_summary.json",
+    summary_overrides: Dict[str, Any] | None = None,
 ) -> dict:
     output_root = ensure_dir(output_dir)
     rows = load_subset_manifest(manifest_path)
@@ -94,5 +96,7 @@ def run_eval_subset(
         "tag_counts": tag_counts,
         "clips": aggregate,
     }
-    write_json(output_root / "subset_run_summary.json", run_summary)
+    if summary_overrides:
+        run_summary.update(summary_overrides)
+    write_json(output_root / summary_filename, run_summary)
     return run_summary

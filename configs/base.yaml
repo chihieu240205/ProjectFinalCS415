@@ -24,3 +24,11 @@ models:
     detector: grounding_dino
     segmenter: sam2
 
+ablation:
+  variant: baseline_no_regrounding
+  regrounding:
+    enabled: false
+    interval_frames: 10
+    matching: iou
+    min_match_iou: 0.1
+    record_frames: true
