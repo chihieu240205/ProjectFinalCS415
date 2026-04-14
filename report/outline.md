@@ -95,3 +95,48 @@ The second pattern is **occlusion-driven instability**. Clips such as `4992551`,
 The third pattern is **small-object fragility**. The contrast between `10360251` and `11073730` for `car`, and between `853810`/`5730870` and `5630823`/`6413967` for `dog`, suggests that small targets are not uniformly hard; they become hard when small scale is combined with distractors or wide framing. The system can track a small object when it remains visually isolated, but performance deteriorates quickly when the same object competes with clutter or secondary motion cues.
 
 The practical conclusion after the ablation is more specific. The baseline is already good enough to establish a credible first result section, but the first periodic re-grounding variant is not a net improvement. Instead of cleanly fixing hard cases, it often rescues severe failures only by pulling many easy or already-stable clips down to `partial_tracking`. That shifts the next experimental direction: rather than adding more naive periodic schedules, the more promising follow-up is selective or trigger-based re-grounding with a stricter matching rule.
+
+## Report Tables
+
+### Table 1. Baseline Summary
+
+| subset_size | tag_distribution | baseline_review_counts | interpretation |
+| --- | --- | --- | --- |
+| 19 | easy=5, occlusion=5, crowded=5, small_object=4 | good_tracking=7, partial_tracking=7, drift=2, wrong_object=1, no_detection=1, fallback=1 | The no-re-grounding baseline is reliable on clean single-target clips but degrades under crowding, occlusion, and small-object settings. |
+
+### Table 2. Ablation Delta Summary
+
+| improved | same | worse | reground_review_counts | interpretation |
+| --- | --- | --- | --- | --- |
+| 4 | 8 | 7 | partial_tracking=18, fallback=1 | Periodic re-grounding every 10 frames is not a net win; it rescues a few hard failures but destabilizes many clips that were already strong under the baseline. |
+
+## Figure Package
+
+Lock the report/slides figure set to exactly six items so the narrative stays fixed.
+
+- `F1_baseline_success_small_object`: `10360251`, prompt=`car`, label=`good_tracking`. Chosen because it shows the baseline can still succeed on a small-object clip when the target remains visually separable.
+- `F2_baseline_success_easy`: `853810`, prompt=`dog`, label=`good_tracking`. Chosen because it is the cleanest single-target success case and makes the baseline strength easy to explain.
+- `F3_baseline_failure_wrong_object`: `12699538`, prompt=`person`, label=`wrong_object`. Chosen because it visualizes crowd-driven identity switching clearly.
+- `F4_baseline_failure_drift`: `5630823`, prompt=`dog`, label=`drift`. Chosen because it is a compact example of small-object tracking collapsing toward a distractor.
+- `F5_ablation_improved`: `12699538`, prompt=`person`, `wrong_object -> partial_tracking`. Chosen because it is the clearest case where periodic re-grounding helps a severe baseline failure.
+- `F6_ablation_worse`: `10360251`, prompt=`car`, `good_tracking -> partial_tracking`. Chosen because it cleanly demonstrates the cost of naive periodic re-grounding on a clip that baseline already handled well.
+
+The slide mapping should stay derivative from this report package:
+
+- Slide 1: Table 1 baseline summary
+- Slide 2: F1-F4 baseline success/failure examples
+- Slide 3: Table 2 ablation delta summary
+- Slide 4: F5-F6 ablation improved vs worse examples
+- Slide 5: Final discussion takeaway bullets
+
+## Final Discussion
+
+The project now has a coherent result story rather than just a runnable pipeline. The official no-re-grounding baseline establishes that `Grounding DINO + SAM2` is already a credible reference system on the locked subset: it completes all runs, stays on the primary `sam2_video_predictor` path, and produces several genuinely strong qualitative cases on clear single-target clips. That matters because it means later comparisons are not being made against a broken or unstable baseline.
+
+At the same time, the baseline exposes a clear and defensible weakness profile. Performance degrades most often when prompts are underspecified relative to the scene, especially in crowds, partial occlusion, and small-object settings. The failure analysis shows that the core issue is not infrastructure reliability but target identity preservation under ambiguity. This gives the project a clean problem statement for the experimental section: the question is how to recover from drift and wrong-object switches without destabilizing already-good tracks.
+
+The periodic re-grounding ablation answers that question in an informative but negative way. Re-detecting every 10 frames does help a few severe failure clips, especially crowded and occluded cases that were previously labeled `drift`, `wrong_object`, or `fallback`. However, it also downgrades many clips that were already `good_tracking` under the baseline. The resulting `4 improved / 8 same / 7 worse` split is strong evidence that naive periodic re-grounding is too blunt an intervention for this setting.
+
+That negative result is still useful. It narrows the design space and rules out one simplistic fix: periodic refresh on a fixed schedule with a permissive IoU threshold is not the right default policy. The main lesson is that re-grounding must be more selective than the current implementation. If the project were extended, the most justified next step would be a trigger-based or more conservative re-grounding strategy, for example one with stricter matching, quality-based gating, or re-detection only when propagation confidence visibly degrades.
+
+The final project-level conclusion is therefore straightforward. The stronger default result is the no-re-grounding baseline. It is stable enough to serve as the main system and honest enough to reveal real weaknesses. The periodic re-grounding ablation is valuable not because it wins, but because it shows exactly why naive refresh does not automatically solve RVOS failure modes: it can rescue hard failures, but it can also inject unnecessary detector noise and destabilize clips that propagation already handled correctly.
