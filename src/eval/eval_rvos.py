@@ -37,6 +37,18 @@ def _validate_row(row: dict) -> None:
         )
 
 
+def _resolve_prompt(row: dict) -> str:
+    notes = str(row.get("notes", "")).strip()
+    if notes.startswith("prompt="):
+        prompt_section = notes.split("|", 1)[0].strip()
+        prompt = prompt_section[len("prompt=") :].strip()
+        if prompt:
+            return prompt
+    if notes:
+        return notes
+    return str(row.get("primary_tag", "")).strip()
+
+
 def selected_rows(rows: Iterable[dict], limit: int | None = None) -> List[dict]:
     selected = [row for row in rows if _is_selected(row.get("selected", "0"))]
     if limit is not None:
@@ -61,15 +73,17 @@ def run_eval_subset(
 
     for row in chosen_rows:
         clip_output_dir = output_root / row["clip_id"]
+        prompt = _resolve_prompt(row)
         summary = run_inference(
             input_path=row["video_path"],
-            prompt=row["notes"].strip() or row["primary_tag"],
+            prompt=prompt,
             config=config,
             output_dir=clip_output_dir,
         )
         summary["clip_id"] = row["clip_id"]
         summary["primary_tag"] = row["primary_tag"]
         summary["manifest_notes"] = row["notes"]
+        summary["manifest_prompt"] = prompt
         aggregate.append(summary)
         tag_counts[row["primary_tag"]] = tag_counts.get(row["primary_tag"], 0) + 1
 
