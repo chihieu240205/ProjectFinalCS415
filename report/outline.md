@@ -72,6 +72,18 @@ Representative failure cases for the write-up:
 - `5630823` (`small_object`, prompt=`dog`): `drift` toward a moving distractor while tracking a small target.
 - `6664239` (`crowded`, prompt=`person`): `no_detection` in a dense night scene with heavy motion and distractors.
 
+## Ablation Results
+
+The main ablation adds naive periodic re-grounding every 10 frames on top of the same `Grounding DINO + SAM2` stack and evaluates it on the same locked 19-clip subset. This keeps the comparison clean: the prompt set, clip set, checkpoints, and qualitative review procedure are unchanged, so any difference can be attributed to the re-grounding policy itself rather than data drift.
+
+At the clip level, the re-grounding variant produced `4 improved`, `8 same`, and `7 worse` outcomes relative to the no-re-grounding baseline. The reviewed re-grounding labels collapsed to `18 partial_tracking` and `1 fallback`, which is a strong sign that periodic reseeding reduced a few severe failures but also destabilized many clips that were previously solid. In effect, the ablation traded several hard failures for a broad shift toward middling tracking quality.
+
+The improvement cases are still meaningful. Re-grounding helped several baseline failure clips move upward into `partial_tracking`, including `11998127` (`drift -> partial_tracking`), `12699538` (`wrong_object -> partial_tracking`), `5220726` (`fallback -> partial_tracking`), and `5630823` (`drift -> partial_tracking`). These are exactly the kinds of crowded, occluded, and small-object scenes where periodic re-detection can plausibly recover from accumulated tracking drift.
+
+However, the negative side of the ablation is stronger than the positive side in this first version. Several clips that were previously labeled `good_tracking` degraded to `partial_tracking`, including `10360251`, `853810`, `16436839`, `5730870`, `6326811`, `7825225`, and `9910242`. This pattern suggests that the current re-grounding policy is too aggressive: detector refreshes are being accepted often enough to introduce extra target jitter or unnecessary resets even when propagation is already stable.
+
+The runtime pattern supports that interpretation. Most clips show `4` re-ground attempts and often `4` successes, meaning the detector is finding an acceptable box at nearly every scheduled refresh. With `min_match_iou = 0.1`, the current acceptance rule is probably too permissive. The ablation therefore produces a useful negative result: **naive periodic re-grounding every 10 frames does not outperform the baseline overall**, even though it can rescue a subset of difficult clips.
+
 ## Failure Analysis
 
 The 10 reviewed example cases show that the dominant failure modes are semantic ambiguity and target persistence, not infrastructure instability. Because all official baseline runs stayed on `sam2_video_predictor`, the failure analysis can focus on scene difficulty instead of implementation bugs.
@@ -82,4 +94,4 @@ The second pattern is **occlusion-driven instability**. Clips such as `4992551`,
 
 The third pattern is **small-object fragility**. The contrast between `10360251` and `11073730` for `car`, and between `853810`/`5730870` and `5630823`/`6413967` for `dog`, suggests that small targets are not uniformly hard; they become hard when small scale is combined with distractors or wide framing. The system can track a small object when it remains visually isolated, but performance deteriorates quickly when the same object competes with clutter or secondary motion cues.
 
-The practical conclusion is that the baseline is already good enough to establish a credible first result section: it is reliable on clean single-target clips and still usable on moderate difficulty scenes, but it degrades in exactly the settings where re-grounding or periodic re-detection would be expected to help. That makes the next experimental step well motivated: keep this no-re-grounding baseline fixed, then compare it against a re-grounding variant on the same subset and the same reviewed cases.
+The practical conclusion after the ablation is more specific. The baseline is already good enough to establish a credible first result section, but the first periodic re-grounding variant is not a net improvement. Instead of cleanly fixing hard cases, it often rescues severe failures only by pulling many easy or already-stable clips down to `partial_tracking`. That shifts the next experimental direction: rather than adding more naive periodic schedules, the more promising follow-up is selective or trigger-based re-grounding with a stricter matching rule.
