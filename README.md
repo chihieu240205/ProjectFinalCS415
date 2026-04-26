@@ -6,7 +6,7 @@ This project is a computer vision final project focused on referring video objec
 ## Screencapture Video With Audio
 No narrated screencapture file is currently stored in this repository, so the README cannot yet embed a real video asset. To satisfy the final submission requirement, replace the placeholder below with your actual YouTube, Google Drive, or GitHub-hosted recording link after you export the screencast.
 
-**Video link:** [Project screencapture walkthrough with audio](PASTE_VIDEO_URL_HERE)
+**Video link:** [Project screencapture walkthrough with audio](https://drive.google.com/drive/folders/1KsSFsciZvgk2s_LKpmeXRkCjJS5YodpG?usp=sharing)
 
 ## Project Overview
 This repository is the source of truth for the project code, configs, and lightweight notebooks.
