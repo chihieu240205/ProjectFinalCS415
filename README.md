@@ -25,6 +25,10 @@ The repository is organized so that:
 - notebooks call scripts instead of holding business logic
 - checkpoints, raw data, and generated outputs stay outside git
 
+## Demo Video
+
+[Watch the screencast demo with audio explanation]
+
 ## Folder Structure
 ```text
 ProjectFinalCS415/
