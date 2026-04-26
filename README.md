@@ -1,6 +1,17 @@
-# CV Final Project
+# Text-Prompted Video Object Tracking with Grounding DINO and SAM2
+
+This project explores text-prompted video object tracking using a pipeline built with Grounding DINO and SAM2. The goal is to detect an object from a natural-language prompt, initialize a mask, and then track that object across video frames. I built the project in Python using repository-based scripts, configuration files, lightweight notebooks, and Google Colab for the heavier model stack and inference runs. I also tested different re-grounding strategies to compare how reseeding affected tracking quality on a locked subset of video clips. Along the way, I learned a lot about evaluation design, failure analysis, and the challenge of making computer vision pipelines both accurate and reproducible.
+
+## Highlights
+
+- Uses **Grounding DINO** to localize an object from a text prompt
+- Uses **SAM2** to convert detections into masks and propagate them through video
+- Separates local development from heavier Colab-based inference workflows
+- Supports structured configs, reusable scripts, and reproducible experiment organization
+- Includes space for smoke tests, ablations, qualitative outputs, and report assets
 
 ## Project Overview
+
 This repository is the source of truth for the project code, configs, and lightweight notebooks.
 
 - MacBook Air M4 is the development environment for code, Git, lightweight data work, visualization, local wiring checks, and report assets.
