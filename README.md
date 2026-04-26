@@ -27,7 +27,11 @@ The repository is organized so that:
 
 ## Demo Video
 
-[Watch the screencast demo with audio explanation]
+[Watch the screencast demo](https://drive.google.com/drive/folders/167htnGyR7QGO6jsvML6LrENZBLzjcxW6)
+
+## Visual Results
+
+![Annotated mask result](https://drive.google.com/drive/folders/1EdKYuOydGqeE7B-z-GTAoTQQPUcaLtSM)
 
 ## Folder Structure
 ```text
